@@ -1,0 +1,12 @@
+# Игнорируем данные и веса моделей
+filestore/
+s3/
+datasets/
+checkpoints/
+results/
+*.pth
+*.tif
+*.tiff
+.ipynb_checkpoints/
+__pycache__/
+*.zip

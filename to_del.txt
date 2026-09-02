@@ -1,0 +1,106 @@
+# ==============================================================================
+# МОДУЛЬ 8: Детальный визуальный аудит 64 патчей случайного снимка из TEST SET
+# ==============================================================================
+def visualize_all_patches_for_random_test_image(
+    model,
+    test_dataset,
+    patch_size=512,
+    overlap_ratio=0.2,
+    max_patches_to_show=10,
+    checkpoint_path="checkpoints/restormer_best_model.pth",
+    device=device
+):
+    if os.path.exists(checkpoint_path):
+        model.load_state_dict(torch.load(checkpoint_path, map_location=device))
+        print(f"✅ Успешно загружены лучшие веса из: '{checkpoint_path}'")
+    model.eval()
+
+    # Выбираем случайный снимок из ТЕСТОВОЙ выборки
+    rand_idx = random.randint(0, len(test_dataset.common_names) - 1)
+    test_noisy_path = test_dataset.noisy_paths[rand_idx]
+    test_clean_path = test_dataset.clean_paths[rand_idx]
+    file_name = test_dataset.common_names[rand_idx]
+
+    print(f"🎯 Выбран случайный тестовый снимок: '{file_name}' (Индекс в тесте: {rand_idx})")
+
+    # Нарезка полного снимка
+    noisy_patches, coords, orig_shape = slice_image_to_patches(
+        test_noisy_path, patch_size=patch_size, overlap_ratio=overlap_ratio
+    )
+    clean_patches, _, _ = slice_image_to_patches(
+        test_clean_path, patch_size=patch_size, overlap_ratio=overlap_ratio
+    )
+
+    total_patches = len(noisy_patches)
+    cleaned_patches = []
+    batch_size = 8
+
+    with torch.no_grad():
+        for i in range(0, total_patches, batch_size):
+            batch_n = noisy_patches[i:i+batch_size]
+
+            # Нормализация и генерация Canny
+            batch_2ch = []
+            for p in batch_n:
+                p_u8 = ((p - np.min(p)) / (np.max(p) - np.min(p) + 1e-8) * 255.0).astype(np.uint8)
+                p_norm = p_u8.astype(np.float32) / 255.0
+                canny_u8 = cv2.Canny(cv2.GaussianBlur(p_u8, (3, 3), 1.0), 65, 140)
+                canny_norm = canny_u8.astype(np.float32) / 255.0
+
+                # 2 канала: [Noisy, Canny]
+                tensor_2ch = np.stack([p_norm, canny_norm], axis=0)
+                batch_2ch.append(tensor_2ch)
+
+            batch_tensor = torch.from_numpy(np.array(batch_2ch)).float().to(device)
+
+            with torch.cuda.amp.autocast(enabled=(device.type == 'cuda')):
+                preds = model(batch_tensor)
+            preds_np = preds.squeeze(1).cpu().numpy()
+
+            for p in preds_np:
+                cleaned_patches.append(p)
+
+    num_to_plot = total_patches if max_patches_to_show is None else min(max_patches_to_show, total_patches)
+    print(f"🖼️ Отрисовываем {num_to_plot} патчей в формате [Вход | Выход Restormer | Эталон]...\n")
+
+    fig, axes = plt.subplots(num_to_plot, 3, figsize=(15, num_to_plot * 4))
+
+    if num_to_plot == 1:
+        axes = np.expand_dims(axes, axis=0)
+
+    for i in range(num_to_plot):
+        n_p = noisy_patches[i]
+        c_p = clean_patches[i]
+        p_p = cleaned_patches[i]
+        y, x = coords[i]
+
+        n_disp = (n_p - np.min(n_p)) / (np.max(n_p) - np.min(n_p) + 1e-8)
+        c_disp = (c_p - np.min(c_p)) / (np.max(c_p) - np.min(c_p) + 1e-8)
+        p_disp = np.clip(p_p, 0.0, 1.0)
+
+        axes[i, 0].imshow(n_disp, cmap='gray')
+        axes[i, 0].set_title(f"Патч #{i} (y={y}, x={x})\n1. Зашумленный вход", fontsize=10)
+        axes[i, 0].axis('off')
+
+        axes[i, 1].imshow(p_disp, cmap='gray')
+        axes[i, 1].set_title(f"Патч #{i} (y={y}, x={x})\n2. Очищенный Restormer", fontsize=10, color='darkgreen')
+        axes[i, 1].axis('off')
+
+        axes[i, 2].imshow(c_disp, cmap='gray')
+        axes[i, 2].set_title(f"Патч #{i} (y={y}, x={x})\n3. Чистый эталон", fontsize=10)
+        axes[i, 2].axis('off')
+
+    plt.suptitle(f"Сравнение патчей для тестового снимка '{file_name}'", fontsize=15, y=1.001)
+    plt.tight_layout()
+    plt.show()
+
+# Запуск визуализации
+visualize_all_patches_for_random_test_image(
+    model=model,
+    test_dataset=test_dataset,
+    patch_size=512,
+    overlap_ratio=0.2,
+    max_patches_to_show=10,
+    checkpoint_path="checkpoints/restormer_best_model.pth",
+    device=device
+)

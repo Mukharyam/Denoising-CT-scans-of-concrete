@@ -1,0 +1,83 @@
+0 verbose cli /usr/bin/node /usr/bin/npm
+1 info using npm@9.6.3
+2 info using node@v19.9.0
+3 timing npm:load:whichnode Completed in 2ms
+4 timing config:load:defaults Completed in 2ms
+5 timing config:load:file:/usr/lib/node_modules/npm/npmrc Completed in 2ms
+6 timing config:load:builtin Completed in 2ms
+7 timing config:load:cli Completed in 3ms
+8 timing config:load:env Completed in 1ms
+9 timing config:load:file:/tmp/tmpr2pgt2mf/.npmrc Completed in 1ms
+10 timing config:load:project Completed in 12ms
+11 timing config:load:file:/home/jupyter/.npmrc Completed in 1ms
+12 timing config:load:user Completed in 2ms
+13 timing config:load:file:/usr/etc/npmrc Completed in 4ms
+14 timing config:load:global Completed in 4ms
+15 timing config:load:setEnvs Completed in 3ms
+16 timing config:load Completed in 30ms
+17 timing npm:load:configload Completed in 31ms
+18 timing npm:load:mkdirpcache Completed in 1ms
+19 timing npm:load:mkdirplogs Completed in 1ms
+20 verbose title npm pack /app/dedicated_front_extension
+21 verbose argv "pack" "/app/dedicated_front_extension"
+22 timing npm:load:setTitle Completed in 2ms
+23 timing config:load:flatten Completed in 4ms
+24 timing npm:load:display Completed in 5ms
+25 verbose logfile logs-max:10 dir:/home/jupyter/.npm/_logs/2026-08-15T06_42_23_420Z-
+26 verbose logfile /home/jupyter/.npm/_logs/2026-08-15T06_42_23_420Z-debug-0.log
+27 timing npm:load:logFile Completed in 68ms
+28 timing npm:load:timers Completed in 0ms
+29 timing npm:load:configScope Completed in 0ms
+30 timing npm:load Completed in 117ms
+31 timing arborist:ctor Completed in 1ms
+32 silly logfile done cleaning log files
+33 notice
+34 notice 📦  dedicated_front_extension@0.1.0
+35 notice === Tarball Contents ===
+36 notice 1.5kB LICENSE                         
+36 notice 3.1kB README.md                       
+36 notice 138B  lib/command-registry-plugin.d.ts
+36 notice 1.5kB lib/command-registry-plugin.js  
+36 notice 131B  lib/copy-path-plugin.d.ts       
+36 notice 1.5kB lib/copy-path-plugin.js         
+36 notice 138B  lib/current-notebook-plugin.d.ts
+36 notice 1.2kB lib/current-notebook-plugin.js  
+36 notice 128B  lib/dirty-plugin.d.ts           
+36 notice 626B  lib/dirty-plugin.js             
+36 notice 432B  lib/download-project.d.ts       
+36 notice 1.2kB lib/download-project.js         
+36 notice 288B  lib/env-plugin.d.ts             
+36 notice 620B  lib/env-plugin.js               
+36 notice 148B  lib/index.d.ts                  
+36 notice 1.0kB lib/index.js                    
+36 notice 134B  lib/launcher.d.ts               
+36 notice 3.3kB lib/launcher.js                 
+36 notice 138B  lib/message-listener-plugin.d.ts
+36 notice 2.2kB lib/message-listener-plugin.js  
+36 notice 136B  lib/notebook-state.d.ts         
+36 notice 2.5kB lib/notebook-state.js           
+36 notice 328B  lib/open-console.d.ts           
+36 notice 738B  lib/open-console.js             
+36 notice 401B  lib/open-notebook.d.ts          
+36 notice 1.3kB lib/open-notebook.js            
+36 notice 220B  lib/select-execution-config.d.ts
+36 notice 7.7kB lib/select-execution-config.js  
+36 notice 3.7kB package.json                    
+36 notice 125B  schema/env.json                 
+36 notice 138B  style/base.css                  
+36 notice 25B   style/index.css                 
+36 notice 21B   style/index.js                  
+37 notice === Tarball Details ===
+38 notice name:          dedicated_front_extension               
+38 notice version:       0.1.0                                   
+38 notice filename:      dedicated_front_extension-0.1.0.tgz     
+38 notice package size:  10.0 kB                                 
+38 notice unpacked size: 36.8 kB                                 
+38 notice shasum:        be52d37eec27ae4395c4c6a1060b7772175143f2
+38 notice integrity:     sha512-BQ7u4BIspoZXX[...]ZrBSq+h7FjNkQ==
+38 notice total files:   33                                      
+39 notice
+40 timing command:pack Completed in 2438ms
+41 verbose exit 0
+42 timing npm Completed in 2583ms
+43 info ok

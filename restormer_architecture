@@ -1,0 +1,93 @@
+// Guided Restormer for CT Denoising
+digraph Restormer_CT_Architecture {
+	fontname=Helvetica nodesep=0.4 rankdir=TB ranksep=0.5 splines=ortho
+	node [fontname=Helvetica fontsize=11 shape=box style="rounded,filled"]
+	edge [color="#4A5568" fontname=Helvetica fontsize=9]
+	subgraph cluster_input {
+		color="#CBD5E1" label="Входные данные (2 канала)" style="dashed,rounded"
+		noisy_in [label="Зашумленный срез CT
+[1, H, W]" fillcolor="#FEE2E2"]
+		canny_in [label="Карта границ Canny
+[1, H, W]" fillcolor="#FEF3C7"]
+		cat_in [label="Concat (Входной тензор)
+[2, H, W]" fillcolor="#E0E7FF"]
+	}
+	in_conv [label="Начальная свертка (Conv 3x3)
+Размерность C = 48" fillcolor="#E2E8F0"]
+	subgraph cluster_encoder {
+		bgcolor="#F8FAFC" color="#93C5FD" label="Энкодер (Извлечение признаков)" style=rounded
+		enc1 [label="Encoder Level 1
+Transformer Blocks (C=48)
+[48, H, W]" fillcolor="#DBEAFE"]
+		down1 [label="Downsample (Conv 2x2, stride=2)
+[96, H/2, W/2]" fillcolor="#BFDBFE"]
+		enc2 [label="Encoder Level 2
+Transformer Blocks (C=96)
+[96, H/2, W/2]" fillcolor="#DBEAFE"]
+		down2 [label="Downsample (Conv 2x2, stride=2)
+[192, H/4, W/4]" fillcolor="#BFDBFE"]
+		enc3 [label="Encoder Level 3
+Transformer Blocks (C=192)
+[192, H/4, W/4]" fillcolor="#DBEAFE"]
+		down3 [label="Downsample (Conv 2x2, stride=2)
+[384, H/8, W/8]" fillcolor="#BFDBFE"]
+	}
+	bottleneck [label="Горлышко (Bottleneck)
+Transformer Blocks (C=384)
+[384, H/8, W/8]" fillcolor="#DDD6FE"]
+	subgraph cluster_decoder {
+		bgcolor="#F8FAFC" color="#86EFAC" label="Декодер (Восстановление разрешения)" style=rounded
+		up3 [label="Upsample (ConvTransposed2d)
+[192, H/4, W/4]" fillcolor="#BBF7D0"]
+		dec3 [label="Decoder Level 3
+Concat + Conv 1x1 + Transformer
+[192, H/4, W/4]" fillcolor="#DCFCE7"]
+		up2 [label="Upsample (ConvTransposed2d)
+[96, H/2, W/2]" fillcolor="#BBF7D0"]
+		dec2 [label="Decoder Level 2
+Concat + Conv 1x1 + Transformer
+[96, H/2, W/2]" fillcolor="#DCFCE7"]
+		up1 [label="Upsample (ConvTransposed2d)
+[48, H, W]" fillcolor="#BBF7D0"]
+		dec1 [label="Decoder Level 1
+Concat + Conv 1x1 + Transformer
+[48, H, W]" fillcolor="#DCFCE7"]
+	}
+	out_conv [label="Финальная свертка (Conv 3x3)
+Прогноз шума [1, H, W]" fillcolor="#FED7AA"]
+	sub_residual [label="Global Residual (Вычитание)
+Чистый = Noisy - Шум" fillcolor="#FCA5A5" shape=circle]
+	final_clean [label="Очищенная томограмма (Выход)
+[1, H, W]" fillcolor="#86EFAC" style="filled,bold"]
+	subgraph cluster_block_detail {
+		color="#CBD5E1" label="Анатомия 1 блока Restormer" style="dotted,rounded"
+		mdta [label="MDTA (Multi-Dconv Head Attention)
+Канальное внимание O(C^2)" fillcolor="#E0E7FF"]
+		gdfn [label="GDFN (Gated-Dconv FFN)
+Gated шлюз с нелинейностью GELU" fillcolor="#E0E7FF"]
+		mdta -> gdfn [label=LayerNorm]
+	}
+	noisy_in -> cat_in
+	canny_in -> cat_in
+	cat_in -> in_conv
+	in_conv -> enc1
+	enc1 -> down1
+	down1 -> enc2
+	enc2 -> down2
+	down2 -> enc3
+	enc3 -> down3
+	down3 -> bottleneck
+	bottleneck -> up3
+	up3 -> dec3
+	dec3 -> up2
+	up2 -> dec2
+	dec2 -> up1
+	up1 -> dec1
+	dec1 -> out_conv
+	enc3 -> dec3 [label="Skip 3" color="#3B82F6" constraint=false style=dashed]
+	enc2 -> dec2 [label="Skip 2" color="#3B82F6" constraint=false style=dashed]
+	enc1 -> dec1 [label="Skip 1" color="#3B82F6" constraint=false style=dashed]
+	out_conv -> sub_residual [label="Шум (-)"]
+	noisy_in -> sub_residual [label="Оригинал (+)" color="#EF4444" constraint=false style=dashed]
+	sub_residual -> final_clean
+}
