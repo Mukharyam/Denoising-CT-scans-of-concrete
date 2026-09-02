@@ -188,4 +188,5 @@ pip install tifffile opencv-python scikit-image torchmetrics tqdm pandas matplot
 Для потоковой выкачки датасета с Яндекс.Диска запустите ноутбук:
 ```bash
 jupyter notebook parser_from_disk.ipynb
+#в настоящее время ссылка на набор данных отсутствует в целях защиты авторских прав
 ```
